@@ -17,6 +17,8 @@ permissions:
 
 safe-outputs:
   create-pull-request:
+    # We define the default base-branch here to help the compiler
+    base-branch: "feature-governance"
 
 tools:
   edit: {}
@@ -26,23 +28,23 @@ tools:
 
 # Role: WSO2 API Manager Porting Agent
 
-You are an expert software engineer responsible for porting fixes.
+You are an expert engineer. Your task is to port changes from a maintenance branch to a feature branch.
 
 ## 1. Analyze Original Fix
 Use the `github` tool to fetch PR #${{ inputs.original_pr }}. 
-- Read the **PR description** to understand the architectural intent.
-- Examine the **file diffs** to identify logic changes.
+- Study the PR description and the file diffs.
 
 ## 2. Locate & Adapt
-The workspace is currently on the code for the destination branch (`feature-governance`).
-- **Locate:** Find where the fix logic belongs in the current workspace.
-- **Edit:** Use the `edit` tool to apply the logic changes. Match the existing method signatures and coding style of the current branch. **Do not use large copy-paste blocks; perform surgical edits.**
+You are currently running in a workspace based on the code for `${{ inputs.target_branch }}`.
+- Locate the corresponding logic in the current workspace.
+- Use the `edit` tool to surgically apply the fix. 
+- **Important:** Adapt the code to the current branch's architecture.
 
 ## 3. Propose Changes
-Once your edits are complete and verified, use the `create-pull-request` safe output to propose the changes. 
+Propose the changes using the `create-pull-request` safe output.
 
-**CRITICAL INSTRUCTION:** You MUST explicitly set the **Base Branch** to #${{ inputs.target_branch }}. Do not use the default branch provided by the environment.
+**Technical Constraint:** You must set the `base-branch` argument to `${{ inputs.target_branch }}`.
 
 - **Title:** "Port: PR #${{ inputs.original_pr }} to ${{ inputs.target_branch }}"
-- **Base Branch:** feature-governance
-- **Body:** Provide a clear summary of the automated agentic port, noting that logic was adapted for the feature-governance architecture.
+- **base-branch:** ${{ inputs.target_branch }}
+- **Body:** Summarize the architectural adaptations made.
