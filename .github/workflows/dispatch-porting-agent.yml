@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [closed]
     branches:
-      - 'v9.20.74-testing'
+      - 'v9.20.74-testing-5'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
