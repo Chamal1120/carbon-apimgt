@@ -1,0 +1,26 @@
+name: Dispatch Agentic Porting
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - 'testing-13357'
+
+jobs:
+  dispatch:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Trigger Porting Agent
+        env:
+          GH_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+        run: |
+          echo "Dispatching Porting agent for PR #${{ github.event.pull_request.number }}..."
+          gh workflow run porting-agent.lock.yml \
+            --ref feature-governance \
+            -f original_pr=${{ github.event.pull_request.number }} \
+            -f target_branch=feature-governance
+
