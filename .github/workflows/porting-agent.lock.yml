@@ -22,7 +22,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"b39932abdbe533e99afdc24457f9a6fb0c39cddd3fac190e2ffaf444acfb05fe","compiler_version":"v0.57.2","strict":true}
+# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"3aa30bedc29bf68df8f0ed78076d49e07bb3120efd2c3d25e8a0945b562959e3","compiler_version":"v0.57.2","strict":true}
 
 name: "Role: WSO2 API Manager Porting Agent"
 "on":
