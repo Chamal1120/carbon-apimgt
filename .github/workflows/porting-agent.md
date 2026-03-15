@@ -42,7 +42,7 @@ You are currently running in a workspace based on the code for `${{ inputs.targe
 ## 3. Compile and Verify (Self-Healing Loop)
 You must ensure the code compiles before proposing changes. You have a **maximum of 3 attempts** to fix compilation errors.
 
-1. **Run Build:** Execute `mvn clean compile -DskipTests` (or the relevant build command) using the `shell` tool.
+1. **Run Build:** Execute `mvn clean compile -Dmaven.test.skip=true` (or the relevant build command) using the `shell` tool.
 2. **Evaluate:**
    - **If Success:** Proceed to Step 4.
    - **If Failure:** - Capture the error logs.
