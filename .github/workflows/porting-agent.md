@@ -20,6 +20,14 @@ network:
     - java
     - "maven.wso2.org"
     - "dist.wso2.org"
+    - "repo1.maven.org"
+    - "repo.maven.apache.org"
+    - "central.sonatype.com"
+    - "maven.apache.org"
+    - "plugins.gradle.org"
+    - "maven.wso2.org"
+    - "dist.wso2.org"
+    - "maven.pkg.github.com"
 
 permissions:
   contents: read
@@ -50,8 +58,10 @@ You are currently running in a workspace based on the code for `${{ inputs.targe
 - **Important:** Adapt the code to the current branch's architecture.
 
 ## 3.  Don't try to use the pre-existing .m2
-- Create a fresh one that the 'awfuser' definitely owns `mkdir -p /home/runner/work/repo-name/custom-m2`.
-- Tell Maven to use it. `mvn clean compile -Dmaven.repo.local=/home/runner/work/repo-name/custom-m2`
+- Create a fresh one that the 'awfuser' definitely owns:
+    `mkdir -p /temp/gh-aw/agent/custom-m2`.
+- Tell Maven to use it:
+    `mvn clean compile -Dmaven.repo.local=/tmp/gh-aw/agent/custom-m2`
 
 ## 4. Compile and Verify (Self-Healing Loop)
 You must ensure the code compiles before proposing changes. You have a **maximum of 3 attempts** to fix compilation errors.
