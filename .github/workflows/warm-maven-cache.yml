@@ -1,0 +1,28 @@
+# .github/workflows/warm-maven-cache.yml
+name: Warm Maven Cache
+on:
+  workflow_dispatch:
+
+jobs:
+  warm-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature-governance
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            maven-${{ runner.os }}-
+
+      - name: Pre-download all dependencies
+        run: mvn dependency:go-offline -DskipTests --no-transfer-progress
