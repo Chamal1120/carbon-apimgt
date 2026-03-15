@@ -11,23 +11,17 @@ on:
         required: true
 
 engine: copilot
-
+cache:
+  key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+  path: ~/.m2/repository
+  restore-keys: |
+    maven-${{ runner.os }}-
 network:
   allowed:
     - defaults
     - github
     - containers
     - java
-    - "maven.wso2.org"
-    - "dist.wso2.org"
-    - "repo1.maven.org"
-    - "repo.maven.apache.org"
-    - "central.sonatype.com"
-    - "maven.apache.org"
-    - "plugins.gradle.org"
-    - "maven.wso2.org"
-    - "dist.wso2.org"
-    - "maven.pkg.github.com"
 
 permissions:
   contents: read
@@ -57,16 +51,13 @@ You are currently running in a workspace based on the code for `${{ inputs.targe
 - Use the `edit` tool to surgically apply the fix. 
 - **Important:** Adapt the code to the current branch's architecture.
 
-## 3.  Don't try to use the pre-existing .m2
-- Create a fresh one that the 'awfuser' definitely owns:
-    `mkdir -p /temp/gh-aw/agent/custom-m2`.
-- Tell Maven to use it:
-    `mvn clean compile -Dmaven.repo.local=/tmp/gh-aw/agent/custom-m2`
+## 3. Use the restored Maven cache
+The `~/.m2/repository` has been pre-populated via cache restore.Use it directly — do not create a custom `.m2` directory.
 
 ## 4. Compile and Verify (Self-Healing Loop)
 You must ensure the code compiles before proposing changes. You have a **maximum of 3 attempts** to fix compilation errors.
 
-1. **Run Build:** Execute `mvn clean compile -Dmaven.test.skip=true' using the `shell` tool.
+1. **Run Build:** Execute `mvn clean install -Dmaven.test.skip=true --no-transfer-progress -Dmaven.repo.local=/home/runner/.m2/repository` using `bash` tool.
 2. **Evaluate:**
    - **If Success:** Proceed to Step 4.
    - **If Failure:** - Capture the error logs.
