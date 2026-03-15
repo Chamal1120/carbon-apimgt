@@ -53,7 +53,7 @@ You are currently running in a workspace based on the code for `${{ inputs.targe
 - Create a fresh one that the 'awfuser' definitely owns `mkdir -p /home/runner/work/repo-name/custom-m2`.
 - Tell Maven to use it. `mvn clean compile -Dmaven.repo.local=/home/runner/work/repo-name/custom-m2`
 
-## 3. Compile and Verify (Self-Healing Loop)
+## 4. Compile and Verify (Self-Healing Loop)
 You must ensure the code compiles before proposing changes. You have a **maximum of 3 attempts** to fix compilation errors.
 
 1. **Run Build:** Execute `mvn clean compile -Dmaven.test.skip=true' using the `shell` tool.
@@ -67,7 +67,7 @@ You must ensure the code compiles before proposing changes. You have a **maximum
    - Repeat the build-fix cycle up to 3 times.
    - **Critical:** If the **4th attempt** still results in a compilation error, **STOP immediately**. Do not call `create-pull-request`. Provide a brief summary of the failure in the logs and exit.
 
-## 4. Propose Changes
+## 5. Propose Changes
 If and only if the build succeeded, propose the changes using the `create-pull-request` safe output. The propsed PR **MUST** merge into the `base-brnch` without any merge conflicts.
 
 **Technical Constraint:** You must set the `base-branch` argument to `${{ inputs.target_branch }}`.
