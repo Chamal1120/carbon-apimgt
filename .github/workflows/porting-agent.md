@@ -13,26 +13,10 @@ on:
 engine: copilot
 
 cache:
-  key: maven-${{ runner.os }}-m2
+  key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
   path: /home/runner/.m2/repository
   restore-keys: |
     maven-${{ runner.os }}-
-
-steps:
-  - uses: actions/checkout@v6
-    with:
-      ref: ${{ inputs.target_branch }}
-      persist-credentials: false
-
-  - name: Copy Maven cache to tmp
-    run: |
-      if [ -d "/home/runner/.m2/repository" ]; then
-        mkdir -p /tmp/gh-aw/agent/m2repo
-        cp -r /home/runner/.m2/repository /tmp/gh-aw/agent/m2repo/
-        echo "Maven cache copied successfully"
-      else
-        echo "No cache found"
-      fi
 
 network:
   allowed:
@@ -69,8 +53,12 @@ You are currently running in a workspace based on the code for `${{ inputs.targe
 - Use the `edit` tool to surgically apply the fix. 
 - **Important:** Adapt the code to the current branch's architecture.
 
-## 3. Use the restored Maven cache
-The cache has been restored to `/tmp/gh-aw/agent/m2repo/repository`.
+## 3. Copy and Use the Maven Cache
+First, copy the restored cache to a writable location:
+```
+mkdir -p /tmp/gh-aw/agent/m2repo && cp -r /home/runner/.m2/repository /tmp/gh-aw/agent/m2repo/ 2>/dev/null || echo "Cache copy failed"
+```
+Then use it for the building.
 
 ## 4. Compile and Verify (Self-Healing Loop)
 You must ensure the code compiles before proposing changes. You have a **maximum of 3 attempts** to fix compilation errors.

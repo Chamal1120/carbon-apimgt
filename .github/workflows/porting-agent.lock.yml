@@ -22,7 +22,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"c6570daa10fa493d3a26d24ba735420348088b5e077d7794c6fc42b1555af845","compiler_version":"v0.57.2","strict":true}
+# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"f215d15ec5cbe6ad154c2c9f75725e4d820d72dabd9749602f5f99fc326faed3","compiler_version":"v0.57.2","strict":true}
 
 name: "Role: WSO2 API Manager Porting Agent"
 "on":
@@ -272,27 +272,17 @@ jobs:
         uses: github/gh-aw/actions/setup@32b3a711a9ee97d38e3989c90af0385aff0066a7 # v0.57.2
         with:
           destination: /opt/gh-aw/actions
-      - name: Create gh-aw temp directory
-        run: bash /opt/gh-aw/actions/create_gh_aw_tmp_dir.sh
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-          ref: ${{ inputs.target_branch }}
-      - name: Copy Maven cache to tmp
-        run: |-
-          if [ -d "/home/runner/.m2/repository" ]; then
-            mkdir -p /tmp/gh-aw/agent/m2repo
-            cp -r /home/runner/.m2/repository /tmp/gh-aw/agent/m2repo/
-            echo "Maven cache copied successfully"
-          else
-            echo "No cache found"
-          fi
-
+      - name: Create gh-aw temp directory
+        run: bash /opt/gh-aw/actions/create_gh_aw_tmp_dir.sh
       # Cache configuration from frontmatter processed below
-      - name: Cache (maven-${{ runner.os }}-m2)
+      - name: Cache (maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }})
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
-          key: maven-${{ runner.os }}-m2
+          key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
           path: /home/runner/.m2/repository
           restore-keys: maven-${{ runner.os }}-
       - name: Configure Git credentials
