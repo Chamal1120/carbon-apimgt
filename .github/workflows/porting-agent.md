@@ -11,15 +11,7 @@ on:
         required: true
 
 engine: copilot
-
 strict: false
-
-cache:
-  key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
-  path: /home/runner/.m2/repository
-  restore-keys: |
-    maven-${{ runner.os }}-
-
 network:
   allowed:
     - defaults
@@ -27,6 +19,9 @@ network:
     - containers
     - java
     - maven.wso2.org
+
+sandbox:
+  agent: false
 
 permissions:
   contents: read
@@ -36,9 +31,6 @@ safe-outputs:
   create-pull-request:
     base-branch: "feature-governance"
   threat-detection: false
-
-sandbox:
-  agent: false
 
 tools:
   bash: true
@@ -61,17 +53,10 @@ You are currently running in a workspace based on the code for `${{ inputs.targe
 - Use the `edit` tool to surgically apply the fix. 
 - **Important:** Adapt the code to the current branch's architecture.
 
-## 3. Copy and Use the Maven Cache
-First, copy the restored cache to a writable location:
-```
-mkdir -p /tmp/gh-aw/agent/m2repo && cp -r /home/runner/.m2/repository /tmp/gh-aw/agent/m2repo/ 2>/dev/null || echo "Cache copy failed, will try building with network access"
-```
-Then use it for the building.
-
-## 4. Compile and Verify (Self-Healing Loop)
+## 3. Compile and Verify (Self-Healing Loop)
 You must ensure the code compiles before proposing changes. You have a **maximum of 3 attempts** to fix compilation errors.
 
-1. **Run Build:** Execute `mvn clean install -o -Dmaven.test.skip=true --no-transfer-progress -Dmaven.repo.local=/tmp/gh-aw/agent/m2repo/repository` using `bash` tool. If this fails, try building with internet using a custom writable location for m2.
+1. **Run Build:** Execute `mvn compile --no-transfer-progress -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true` using `bash` tool.
 2. **Evaluate:**
    - **If Success:** Proceed to Step 4.
    - **If Failure:** - Capture the error logs.

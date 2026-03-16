@@ -22,7 +22,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"a72ed8744c294384e1f6cf244314d3eafe43ab11156481d2b788d0ed6fac9a15","compiler_version":"v0.57.2"}
+# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"1520b0a19e0fb3f3206347867689989c8013860810fda402d98586035f90f08a","compiler_version":"v0.57.2"}
 
 name: "Role: WSO2 API Manager Porting Agent"
 "on":
@@ -42,8 +42,6 @@ concurrency:
   group: "gh-aw-${{ github.workflow }}"
 
 run-name: "Role: WSO2 API Manager Porting Agent"
-
-# Cache configuration from frontmatter was processed and added to the main job steps
 
 jobs:
   activation:
@@ -276,13 +274,6 @@ jobs:
           persist-credentials: false
       - name: Create gh-aw temp directory
         run: bash /opt/gh-aw/actions/create_gh_aw_tmp_dir.sh
-      # Cache configuration from frontmatter processed below
-      - name: Cache (maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }})
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
-        with:
-          key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
-          path: /home/runner/.m2/repository
-          restore-keys: maven-${{ runner.os }}-
       - name: Configure Git credentials
         env:
           REPO_NAME: ${{ github.repository }}
