@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [closed]
     branches:
-      - 'testing-13525-a2'
+      - 'testing-13525-a3'
 
 jobs:
   dispatch:
