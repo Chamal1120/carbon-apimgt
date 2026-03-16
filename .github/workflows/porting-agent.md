@@ -13,7 +13,7 @@ on:
 engine: copilot
 cache:
   key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
-  path: ~/.m2/repository
+  path: /home/runner/.m2/repository
   restore-keys: |
     maven-${{ runner.os }}-
 network:
@@ -52,7 +52,7 @@ You are currently running in a workspace based on the code for `${{ inputs.targe
 - **Important:** Adapt the code to the current branch's architecture.
 
 ## 3. Use the restored Maven cache
-The `~/.m2/repository` has been pre-populated via cache restore.Use it directly — do not create a custom `.m2` directory.
+The cache has been restored to `/home/runner/.m2/repository`.
 
 ## 4. Compile and Verify (Self-Healing Loop)
 You must ensure the code compiles before proposing changes. You have a **maximum of 3 attempts** to fix compilation errors.
