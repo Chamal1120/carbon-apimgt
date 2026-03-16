@@ -22,7 +22,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"25d4627cafe2c0febcb5d9b222d998ae0a1bf88aabcf600709ecd2c99c1fa3d1","compiler_version":"v0.57.2","strict":true}
+# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"1fb7918cc801dee69479413d48d6879f6c5db82ea14fbe1531c1a90108a3d725","compiler_version":"v0.57.2","strict":true}
 
 name: "Role: WSO2 API Manager Porting Agent"
 "on":
@@ -272,12 +272,22 @@ jobs:
         uses: github/gh-aw/actions/setup@32b3a711a9ee97d38e3989c90af0385aff0066a7 # v0.57.2
         with:
           destination: /opt/gh-aw/actions
-      - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
       - name: Create gh-aw temp directory
         run: bash /opt/gh-aw/actions/create_gh_aw_tmp_dir.sh
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+          ref: ${{ inputs.target_branch }}
+      - name: Copy Maven cache to tmp
+        run: |-
+          if [ -d "/home/runner/.m2/repository" ]; then
+            mkdir -p /tmp/gh-aw/agent/m2repo
+            cp -r /home/runner/.m2/repository /tmp/gh-aw/agent/m2repo/
+            echo "Maven cache copied successfully"
+          else
+            echo "No cache found"
+          fi
+
       # Cache configuration from frontmatter processed below
       - name: Cache (maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }})
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
