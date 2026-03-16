@@ -20,6 +20,8 @@ network:
     - java
     - maven.wso2.org
 
+timeout-minutes: 60
+
 sandbox:
   agent: false
 
@@ -57,9 +59,9 @@ You are currently running in a workspace based on the code for `${{ inputs.targe
 You must ensure the code compiles before proposing changes. You have a **maximum of 3 attempts** to fix compilation errors. **NOTE THAT BUILDING TAKES APPROXIMATES 12 MINUTES**.
 
 1. **Run Build using following commands to save workflow time:** 
-    i. Execute `mvn clean install --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true` using `bash` tool for the first build. 
+    i. Execute `mvn clean install --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -Dmaven.test.skip=true` using `bash` tool for the first build. 
     ii. Subsequent builds SHOULD use `mvn compile --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true` so no redownloads of dependancies will happen.
-    iii. Also try `mvn install --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true` if subsequent builds throws snapshot dependancies missing error. 
+    iii. Also try `mvn install --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -Dmaven.test.skip=true` if subsequent builds throws snapshot dependancies missing error. 
 
 2. **Evaluate:**
    - **If Success:** Proceed to Step 4.

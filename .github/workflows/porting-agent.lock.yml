@@ -22,7 +22,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"1520b0a19e0fb3f3206347867689989c8013860810fda402d98586035f90f08a","compiler_version":"v0.57.2"}
+# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"c232c1a524613caf91a24e6bbc9e87448608d59d29dc54ffa8bc65291ed6bd49","compiler_version":"v0.57.2"}
 
 name: "Role: WSO2 API Manager Porting Agent"
 "on":
@@ -669,7 +669,7 @@ jobs:
       - name: Execute GitHub Copilot CLI
         id: agentic_execution
         # Copilot CLI tool arguments (sorted):
-        timeout-minutes: 20
+        timeout-minutes: 60
         run: |
           set -o pipefail
           touch /tmp/gh-aw/agent-step-summary.md
@@ -908,7 +908,7 @@ jobs:
           GH_AW_CODE_PUSH_FAILURE_COUNT: ${{ needs.safe_outputs.outputs.code_push_failure_count }}
           GH_AW_GROUP_REPORTS: "false"
           GH_AW_FAILURE_REPORT_AS_ISSUE: "true"
-          GH_AW_TIMEOUT_MINUTES: "20"
+          GH_AW_TIMEOUT_MINUTES: "60"
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
