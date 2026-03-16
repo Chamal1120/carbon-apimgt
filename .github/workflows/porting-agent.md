@@ -11,6 +11,13 @@ on:
         required: true
 
 engine: copilot
+
+cache:
+  key: maven-${{ runner.os }}-m2
+  path: /home/runner/.m2/repository
+  restore-keys: |
+    maven-${{ runner.os }}-
+
 steps:
   - uses: actions/checkout@v6
     with:
@@ -26,11 +33,7 @@ steps:
       else
         echo "No cache found"
       fi
-cache:
-  key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
-  path: /home/runner/.m2/repository
-  restore-keys: |
-    maven-${{ runner.os }}-
+
 network:
   allowed:
     - defaults

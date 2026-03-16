@@ -22,7 +22,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"1fb7918cc801dee69479413d48d6879f6c5db82ea14fbe1531c1a90108a3d725","compiler_version":"v0.57.2","strict":true}
+# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"c6570daa10fa493d3a26d24ba735420348088b5e077d7794c6fc42b1555af845","compiler_version":"v0.57.2","strict":true}
 
 name: "Role: WSO2 API Manager Porting Agent"
 "on":
@@ -289,10 +289,10 @@ jobs:
           fi
 
       # Cache configuration from frontmatter processed below
-      - name: Cache (maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }})
+      - name: Cache (maven-${{ runner.os }}-m2)
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
-          key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+          key: maven-${{ runner.os }}-m2
           path: /home/runner/.m2/repository
           restore-keys: maven-${{ runner.os }}-
       - name: Configure Git credentials
