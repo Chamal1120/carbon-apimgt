@@ -76,7 +76,7 @@ You must ensure the code compiles before proposing changes. You have a **maximum
    - Repeat the build-fix cycle up to 3 times.
    - **Critical:** If the **4th attempt** still results in a compilation error, **STOP immediately**. Do not call `create-pull-request`. Provide a brief summary of the failure in the logs and exit.
 
-## 5. Propose Changes
+## 4. Propose Changes
 If and only if the build succeeded, propose the changes using the `create-pull-request` safe output. The propsed PR **MUST** merge into the `base-brnch` without any merge conflicts.
 
 **Technical Constraint:** You must set the `base-branch` argument to `${{ inputs.target_branch }}`.
