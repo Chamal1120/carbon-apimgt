@@ -22,7 +22,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"2d2d2aee018b2dfd9ee7f7be1f1da629cc239a24788476a4256e1d24f203e83c","compiler_version":"v0.57.2"}
+# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"e0591cb15f6de258203def19c1c59c52ea6fd29f3301a7660efd9357cd4b4331","compiler_version":"v0.57.2"}
 
 name: "Role: WSO2 API Manager Porting Agent"
 "on":
@@ -63,7 +63,7 @@ jobs:
         env:
           GH_AW_INFO_ENGINE_ID: "gemini"
           GH_AW_INFO_ENGINE_NAME: "Google Gemini CLI"
-          GH_AW_INFO_MODEL: "gemini-3.1-pro"
+          GH_AW_INFO_MODEL: "gemini-3.1-pro-preview"
           GH_AW_INFO_VERSION: ""
           GH_AW_INFO_AGENT_VERSION: ""
           GH_AW_INFO_CLI_VERSION: "v0.57.2"
@@ -688,7 +688,7 @@ jobs:
         env:
           DEBUG: gemini-cli:*
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: gemini-3.1-pro
+          GEMINI_MODEL: gemini-3.1-pro-preview
           GH_AW_MCP_CONFIG: ${{ github.workspace }}/.gemini/settings.json
           GH_AW_PHASE: agent
           GH_AW_PROMPT: /tmp/gh-aw/aw-prompts/prompt.txt
@@ -942,7 +942,7 @@ jobs:
     env:
       GH_AW_CALLER_WORKFLOW_ID: "${{ github.repository }}/porting-agent"
       GH_AW_ENGINE_ID: "gemini"
-      GH_AW_ENGINE_MODEL: "gemini-3.1-pro"
+      GH_AW_ENGINE_MODEL: "gemini-3.1-pro-preview"
       GH_AW_WORKFLOW_ID: "porting-agent"
       GH_AW_WORKFLOW_NAME: "Role: WSO2 API Manager Porting Agent"
     outputs:

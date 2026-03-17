@@ -12,7 +12,7 @@ on:
 
 engine:
   id: gemini
-  model: gemini-3.1-pro
+  model: gemini-3.1-pro-preview
   env:
     GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
