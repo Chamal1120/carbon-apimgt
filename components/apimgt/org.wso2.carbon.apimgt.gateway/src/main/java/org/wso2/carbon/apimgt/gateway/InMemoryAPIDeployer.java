@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.transport.dynamicconfigurations.DynamicProfileReloaderHolder;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
@@ -487,6 +488,10 @@ public class InMemoryAPIDeployer {
                                 retrievedAPI.getApiProvider(),
                                 retrievedAPI.getApiType(), retrievedAPI.getContext());
                 deployAPI(deployAPIInGatewayEvent);
+            } else {
+                throw new ArtifactSynchronizerException("API resource not found",
+                        new APIMgtResourceNotFoundException("API " + apiName + " with version " + version
+                                + " not found in tenant " + tenantDomain), ExceptionCodes.NO_API_ARTIFACT_FOUND);
             }
         }
     }
@@ -506,6 +511,10 @@ public class InMemoryAPIDeployer {
                                 retrievedAPI.getApiId(), retrievedAPI.getUuid(), gatewayLabels, apiName, version,
                                 retrievedAPI.getApiProvider(), retrievedAPI.getApiType(), retrievedAPI.getContext());
                 unDeployAPI(deployAPIInGatewayEvent);
+            } else {
+                throw new ArtifactSynchronizerException("API resource not found",
+                        new APIMgtResourceNotFoundException("API " + apiName + " with version " + version
+                                + " not found in tenant " + tenantDomain), ExceptionCodes.NO_API_ARTIFACT_FOUND);
             }
         }
     }

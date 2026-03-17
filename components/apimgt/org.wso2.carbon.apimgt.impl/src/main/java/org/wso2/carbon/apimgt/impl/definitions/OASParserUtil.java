@@ -795,8 +795,10 @@ public class OASParserUtil {
                 } else if (schema instanceof ObjectSchema) {
                     references = addSchemaOfSchema(schema, context);
                 } else if (schema instanceof MapSchema) {
-                    Schema additionalPropertiesSchema = (Schema) schema.getAdditionalProperties();
-                    extractReferenceFromSchema(additionalPropertiesSchema, context);
+                    Object additionalProperties = schema.getAdditionalProperties();
+                    if (additionalProperties instanceof Schema) {
+                        extractReferenceFromSchema((Schema) additionalProperties, context);
+                    }
                 } else if (schema instanceof ComposedSchema) {
                     if (((ComposedSchema) schema).getAllOf() != null) {
                         for (Schema sc : ((ComposedSchema) schema).getAllOf()) {
