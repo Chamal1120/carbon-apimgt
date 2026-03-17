@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [closed]
     branches:
-      - 'testing-13525cp-cdx'
+      - 'testing-13546cp-cdx'
 
 jobs:
   dispatch:
