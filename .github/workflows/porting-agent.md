@@ -74,7 +74,7 @@ You must ensure the code compiles before proposing changes. You have a **maximum
      - **Increment attempt counter.**
 3. **Loop/Halt:**
    - Repeat the build-fix cycle up to 3 times.
-   - **Critical:** If the **4th attempt** still results in a compilation error, **STOP immediately**. Do not call `create-pull-request`. Provide a brief summary of the failure in the logs and exit.
+   - **Critical:** If the **4th attempt** still results in a compilation error, **STOP immediately**. Do not call `create-pull-request`. Figure out why the fix/feature in PR is not possible to port the `base-branch` and provide a brief summary of the failure in the logs and exit.
 
 ## 4. Propose Changes
 If and only if the build succeeded, propose the changes using the `create-pull-request` safe output. The propsed PR **MUST** merge into the `base-brnch` without any merge conflicts.
