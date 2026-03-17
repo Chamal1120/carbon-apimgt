@@ -11,10 +11,9 @@ on:
         required: true
 
 engine:
-  id: gemini
-  model: gemini-2.5-pro
-  env:
-    GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+  id: copilot
+  version: latest
+  model: gpt-5
 
 strict: false
 network:
