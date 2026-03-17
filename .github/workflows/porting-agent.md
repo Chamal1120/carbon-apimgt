@@ -12,8 +12,7 @@ on:
 
 engine:
   id: copilot
-  version: latest
-  model: gpt-5
+  model: gpt-5.3-Codex
 
 strict: false
 network:
