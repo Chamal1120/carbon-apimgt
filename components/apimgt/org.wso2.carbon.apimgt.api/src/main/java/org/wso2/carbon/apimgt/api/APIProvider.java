@@ -1414,7 +1414,26 @@ public interface APIProvider extends APIManager {
      * @param organization           identifier of the organization
      * @throws APIManagementException if failed to add APIRevision
      */
-    void undeployAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments, String organization) throws APIManagementException;
+    void undeployAPIRevisionDeployment(String apiId, String apiRevisionId,
+                                       List<APIRevisionDeployment> apiRevisionDeployments, String organization,
+                                       boolean onDeleteOrRetire) throws APIManagementException;
+
+    /**
+     * Adds a new APIRevisionDeployment to an existing API
+     *
+     * @deprecated use {@link #undeployAPIRevisionDeployment(String, String, List, String, boolean)}
+     * @param apiId                  API UUID
+     * @param apiRevisionId          API Revision UUID
+     * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @param organization           identifier of the organization
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    @Deprecated
+    default void undeployAPIRevisionDeployment(String apiId, String apiRevisionId,
+                                               List<APIRevisionDeployment> apiRevisionDeployments, String organization)
+            throws APIManagementException {
+        undeployAPIRevisionDeployment(apiId, apiRevisionId, apiRevisionDeployments, organization, false);
+    }
 
     /**
      * Restore a provided API Revision as the working copy of the API
@@ -1437,12 +1456,26 @@ public interface APIProvider extends APIManager {
     void deleteAPIRevision(String apiId, String apiRevisionId, String organization) throws APIManagementException;
 
     /**
+     * Delete all API Revisions when the API is deleted or retired.
+     *
+     * @param apiId             API UUID
+     * @param organization      Identifier of an organization
+     * @param onDeleteOrRetire  true when invoked during API delete or retire flows
+     * @throws APIManagementException if failed to delete APIRevision
+     */
+    default void deleteAPIRevisions(String apiId, String organization, boolean onDeleteOrRetire)
+            throws APIManagementException {
+        deleteAPIRevisions(apiId, organization);
+    }
+
+    /**
      * Delete all API Revision
      *
      * @param apiId        API UUID
      * @param organization Identifier of an organization
      * @throws APIManagementException if failed to delete APIRevision
      */
+    @Deprecated
     void deleteAPIRevisions(String apiId, String organization) throws APIManagementException;
 
     /**
