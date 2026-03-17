@@ -10,7 +10,12 @@ on:
         description: 'The branch being ported to'
         required: true
 
-engine: copilot
+engine:
+  id: gemini
+  model: gemini-3.1-pro
+  env:
+    GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
 strict: false
 network:
   allowed:
