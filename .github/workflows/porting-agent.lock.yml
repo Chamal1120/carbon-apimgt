@@ -22,7 +22,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"483199d6b3c158a4c34f798e6386555eeddbdd447252e22828f7cb5caa386540","compiler_version":"v0.57.2"}
+# gh-aw-metadata: {"schema_version":"v2","frontmatter_hash":"f5def8f9181ecdf419b58d64975bb2be4ba51d30e9452d1b20225b008e809707","compiler_version":"v0.57.2"}
 
 name: "Role: WSO2 API Manager Porting Agent"
 "on":
@@ -63,7 +63,7 @@ jobs:
         env:
           GH_AW_INFO_ENGINE_ID: "copilot"
           GH_AW_INFO_ENGINE_NAME: "GitHub Copilot CLI"
-          GH_AW_INFO_MODEL: "gpt-5.3-Codex"
+          GH_AW_INFO_MODEL: "gemini-3.1-pro"
           GH_AW_INFO_VERSION: ""
           GH_AW_INFO_AGENT_VERSION: "latest"
           GH_AW_INFO_CLI_VERSION: "v0.57.2"
@@ -682,7 +682,7 @@ jobs:
         env:
           COPILOT_AGENT_RUNNER_TYPE: STANDALONE
           COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
-          COPILOT_MODEL: gpt-5.3-Codex
+          COPILOT_MODEL: gemini-3.1-pro
           GH_AW_MCP_CONFIG: /home/runner/.copilot/mcp-config.json
           GH_AW_PHASE: agent
           GH_AW_PROMPT: /tmp/gh-aw/aw-prompts/prompt.txt
@@ -962,7 +962,7 @@ jobs:
     env:
       GH_AW_CALLER_WORKFLOW_ID: "${{ github.repository }}/porting-agent"
       GH_AW_ENGINE_ID: "copilot"
-      GH_AW_ENGINE_MODEL: "gpt-5.3-Codex"
+      GH_AW_ENGINE_MODEL: "gemini-3.1-pro"
       GH_AW_WORKFLOW_ID: "porting-agent"
       GH_AW_WORKFLOW_NAME: "Role: WSO2 API Manager Porting Agent"
     outputs:

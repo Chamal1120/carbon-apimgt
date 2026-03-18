@@ -12,7 +12,7 @@ on:
 
 engine:
   id: copilot
-  model: gpt-5.3-Codex
+  model: gemini-3.1-pro
 
 strict: false
 network:
