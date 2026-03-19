@@ -1,0 +1,80 @@
+name: WSO2 Porting Agent (ft. OpenCode)
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - testing-13608op
+
+jobs:
+  port_to_governance:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run opencode
+        id: opencode_port
+        uses: anomalyco/opencode/github@latest
+        env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          OPENCODE_EXPERIMENTAL_LSP_TOOL: "true"
+        with:
+          model: nvidia/moonshotai/kimi-k2.5
+          prompt: |
+            1. Checkout branch 'feature-governance'.
+            2. Create a local branch 'port/pr-${{ github.event.pull_request.number }}'.
+            3. Analyze merge commit ${{ github.event.pull_request.merge_commit_sha }}.
+            4. Analyze the current branch with 'read', 'grep', 'glob' and 'list' tools.
+            5. You also have LSP capabilities to understand the codebase efficiently through 'lsp' tool.
+            6. Port changes in the PR surgically to 'feature-governance' using 'edit' tool.
+            7. Use 'write' tool only if you need to create new files for the port.
+            8. Compile and Verify:
+               i. Initial build: 'mvn clean install --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -Dmaven.test.skip=true'
+               ii. Subsequent fixes: 'mvn compile --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true'
+               iii. Dependency issues: 'mvn install --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -Dmaven.test.skip=true'
+            9. Read build results:
+                i. If successful, create 'porting_notes.md' and commit changes locally.
+                ii. If failed, print the reasons why the porting is not possible.
+
+      - name: Construct Full PR Body
+        if: success()
+        id: prepare_body
+        run: |
+          echo "## Original PR Description" > final_body.md
+          echo "${{ github.event.pull_request.body }}" >> final_body.md
+          echo -e "\n---\n ## AI Porting Notes" >> final_body.md
+          [ -f porting_notes.md ] && cat porting_notes.md >> final_body.md || echo "No notes." >> final_body.md
+          
+          {
+            echo "FULL_BODY<<EOF"
+            cat final_body.md
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Push and Create PR
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git push origin port/pr-${{ github.event.pull_request.number }}
+          gh pr create \
+            --base "feature-governance" \
+            --head "port/pr-${{ github.event.pull_request.number }}" \
+            --title "Port: PR #${{ github.event.pull_request.number }} via Kimi k2.5" \
+            --body "${{ steps.prepare_body.outputs.FULL_BODY }}" \
+            --draft

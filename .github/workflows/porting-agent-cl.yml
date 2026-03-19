@@ -1,0 +1,89 @@
+name: WSO2 Porting Agent (ft. claude)
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - testing-13608cl
+
+jobs:
+  port_to_governance:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: AI driven porting with claude
+        id: claude_port
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            1. Checkout the branch 'feature-governance'.
+            2. Create a local branch 'port/pr-${{ github.event.pull_request.number }}'.
+            3. Analyze the changes in the merge commit ${{ github.event.pull_request.merge_commit_sha }}.
+            4. Port these changes into the current branch. 
+            5. Use your 'edit' tool to SURGICALLY adapt the code:
+               Match the existing architectural patterns, naming conventions, and dependency versions found in 'feature-governance'. Refactor the incoming code to be 100% compatible and conflict-free.
+            6. Compile and Verify (Self-healing Loop):
+               - You must ensure the code compiles. You have a MAXIMUM OF 3 ATTEMPTS to fix compilation errors.
+               - COMMANDS:
+                 i. Initial build: `mvn clean install --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -Dmaven.test.skip=true`
+                 ii. Subsequent fixes: `mvn compile --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true`
+                 iii. Dependency issues: `mvn install --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -Dmaven.test.skip=true`
+               - EVALUATE:
+                 - If Success: Proceed to step 7.
+                 - If Failure: Capture error logs, use 'edit' to fix, increment attempt counter.
+               - HALT: If the 4th attempt fails, STOP IMMEDIATELY. Provide a failure summary and exit with an error code.
+            7. If successful, create 'claude_notes.md' summarizing architectural adaptations.
+            8. Commit code changes locally (excluding 'claude_notes.md').
+
+      - name: Construct Full PR Body
+        if: steps.claude_port.outcome == 'success'
+        id: prepare_body
+        env:
+          ORIGINAL_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          echo "## Original PR Description" > final_body.md
+          echo "$ORIGINAL_BODY" >> final_body.md
+          echo -e "\n---\n" >> final_body.md
+          echo "## AI Porting Notes (Architectural Adaptations)" >> final_body.md
+          if [ -f claude_notes.md ]; then
+            cat claude_notes.md >> final_body.md
+          else
+            echo "No specific architectural adaptations were required." >> final_body.md
+          fi
+          
+          # Multi-line output handling
+          EOF=$(dd if=/dev/urandom bs=15 count=1 2>/dev/null | base64)
+          echo "FULL_BODY<<$EOF" >> $GITHUB_OUTPUT
+          cat final_body.md >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
+
+      - name: Push and Create PR
+        if: steps.claude_port.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FINAL_CONTENT: ${{ steps.prepare_body.outputs.FULL_BODY }}
+        run: |
+          git push origin port/pr-${{ github.event.pull_request.number }}
+          
+          gh pr create \
+            --base "feature-governance" \
+            --head "port/pr-${{ github.event.pull_request.number }}" \
+            --title "Port: PR #${{ github.event.pull_request.number }} to feature-governance" \
+            --body "$FINAL_CONTENT" \
+            --draft
