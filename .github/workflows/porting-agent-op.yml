@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [closed]
     branches:
-      - testing-13608op-a5
+      - testing-13608op-a6
 
 jobs:
   port_to_governance:
