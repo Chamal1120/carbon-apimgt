@@ -36,7 +36,6 @@ jobs:
         with:
           model: nvidia/moonshotai/kimi-k2.5
           use_github_token: true
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: |
             1. Checkout branch 'feature-governance'.
             2. Create a local branch 'port/pr-${{ github.event.pull_request.number }}'.
