@@ -33,6 +33,7 @@ jobs:
         env:
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           OPENCODE_EXPERIMENTAL_LSP_TOOL: "true"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           model: nvidia/moonshotai/kimi-k2.5
           use_github_token: true
