@@ -51,6 +51,17 @@ jobs:
                 i. If successful, create 'porting_notes.md' and commit changes locally.
                 ii. If failed, print the reasons why the porting is not possible.
 
+      - name: Check Port Status
+        id: check_status
+        run: |
+          if [ -f porting_notes.md ]; then
+            echo "PORT_SUCCESS=true" >> $GITHUB_OUTPUT
+          else
+            echo "PORT_SUCCESS=false" >> $GITHUB_OUTPUT
+            echo "Porting failed or build did not pass. Check logs."
+            exit 1
+          fi
+
       - name: Construct Full PR Body
         if: success()
         id: prepare_body
