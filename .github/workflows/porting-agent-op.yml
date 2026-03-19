@@ -35,6 +35,7 @@ jobs:
           OPENCODE_EXPERIMENTAL_LSP_TOOL: "true"
         with:
           model: nvidia/moonshotai/kimi-k2.5
+          token: ${{ secrets.GITHUB_TOKEN }}
           prompt: |
             1. Checkout branch 'feature-governance'.
             2. Create a local branch 'port/pr-${{ github.event.pull_request.number }}'.
