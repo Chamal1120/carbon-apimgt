@@ -47,6 +47,7 @@ import org.wso2.carbon.metrics.manager.Timer;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -157,15 +158,34 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 
             if (selectedApi != null) {
                 Resource[] allAPIResources = selectedApi.getResources();
-                Set<Resource> acceptableResources = new LinkedHashSet<>();
+                List<Resource> acceptableResourcesList = new LinkedList<>();
+                List<Resource> optionsResourcesList = new LinkedList<>();
+                boolean isOptionsRequest = RESTConstants.METHOD_OPTIONS.equals(httpMethod);
 
                 for (Resource resource : allAPIResources) {
-                    //If the requesting method is OPTIONS or if the Resource contains the requesting method
-                    if ((RESTConstants.METHOD_OPTIONS.equals(httpMethod) && resource.getMethods() != null &&
-                            Arrays.asList(resource.getMethods()).contains(corsRequestMethod)) ||
-                            (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
-                        acceptableResources.add(resource);
+                    log.debug("Evaluating resource for acceptable methods");
+                    String[] methods = resource.getMethods();
+                    if (methods == null) {
+                        continue;
                     }
+
+                    List<String> methodList = Arrays.asList(methods);
+
+                    // Handle OPTIONS request with single OPTIONS method defined 1
+                    if (isOptionsRequest && methods.length == 1 && methodList.contains(httpMethod)) {
+                        optionsResourcesList.add(resource);
+                    } else if ((isOptionsRequest && methodList.contains(corsRequestMethod)) ||
+                            methodList.contains(httpMethod)) {
+                        acceptableResourcesList.add(resource);
+                    }
+                }
+
+                Set<Resource> acceptableResources = new LinkedHashSet<>();
+                acceptableResources.addAll(optionsResourcesList);
+                acceptableResources.addAll(acceptableResourcesList);
+                if (log.isDebugEnabled()) {
+                    log.debug("Found " + acceptableResources.size() +
+                            " acceptable resources for method: " + httpMethod);
                 }
 
                 if (!acceptableResources.isEmpty()) {
