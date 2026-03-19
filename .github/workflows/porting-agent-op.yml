@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [closed]
     branches:
-      - testing-13608op-a4
+      - testing-13608op-a5
 
 jobs:
   port_to_governance:
@@ -35,7 +35,8 @@ jobs:
           OPENCODE_EXPERIMENTAL_LSP_TOOL: "true"
         with:
           model: nvidia/moonshotai/kimi-k2.5
-          use_github_token: ${{ secrets.GITHUB_TOKEN }}
+          use_github_token: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: |
             1. Checkout branch 'feature-governance'.
             2. Create a local branch 'port/pr-${{ github.event.pull_request.number }}'.
