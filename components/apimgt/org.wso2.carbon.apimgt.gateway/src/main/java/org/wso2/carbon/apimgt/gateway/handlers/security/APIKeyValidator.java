@@ -58,6 +58,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -382,14 +383,35 @@ public class APIKeyValidator {
             if (selectedApi != null) {
                 Resource[] selectedAPIResources = selectedApi.getResources();
 
-                Set<Resource> acceptableResources = new LinkedHashSet<Resource>();
+                List<Resource> acceptableResourcesList = new LinkedList<>();
+
+                List<Resource> optionsResourcesList = new LinkedList<>();
+
+                boolean isOptionsRequest = RESTConstants.METHOD_OPTIONS.equals(httpMethod);
 
                 for (Resource resource : selectedAPIResources) {
-                    //If the requesting method is OPTIONS or if the Resource contains the requesting method
-                    if (RESTConstants.METHOD_OPTIONS.equals(httpMethod) ||
-                            (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
-                        acceptableResources.add(resource);
+                    log.debug("Evaluating resource for acceptable methods");
+                    String[] methods = resource.getMethods();
+                    if (methods == null) {
+                        continue;
                     }
+
+                    List<String> methodList = Arrays.asList(methods);
+
+                    // Handle OPTIONS request with single OPTIONS method defined 1
+                    if (isOptionsRequest && methods.length == 1 && methodList.contains(httpMethod)) {
+                        optionsResourcesList.add(resource);
+                    } else if (isOptionsRequest || methodList.contains(httpMethod)) {
+                         acceptableResourcesList.add(resource);
+                     }
+                }
+
+                Set<Resource> acceptableResources = new LinkedHashSet<>();
+                acceptableResources.addAll(optionsResourcesList);
+                acceptableResources.addAll(acceptableResourcesList);
+                if (log.isDebugEnabled()) {
+                    log.debug("Found " + acceptableResources.size() +
+                            " acceptable resources for method: " + httpMethod);
                 }
 
                 if (acceptableResources.size() > 0) {
