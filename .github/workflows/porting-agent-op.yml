@@ -63,6 +63,10 @@ jobs:
                     - Do NOT push. Just commit locally.
                 ii. If failed, print the reasons why the porting is not possible.
 
+      - name: Model Stats
+        id: model_stats
+        run: opencode stats
+
       - name: Check Port Status
         id: check_status
         run: |
