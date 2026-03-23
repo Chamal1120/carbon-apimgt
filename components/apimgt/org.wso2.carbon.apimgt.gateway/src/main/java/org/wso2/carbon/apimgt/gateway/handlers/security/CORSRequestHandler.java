@@ -51,6 +51,7 @@ import org.wso2.carbon.metrics.manager.Timer;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -170,13 +171,38 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             Resource selectedResource = null;
             Utils.setSubRequestPath(selectedApi, messageContext);
 
-            if (selectedApi != null) {
-                if ((messageContext.getProperty(RESTConstants.SELECTED_RESOURCE) != null)) {
-                    selectedResource = Utils.getSelectedResource(messageContext, httpMethod, corsRequestMethod);
-                } else {
-                    Resource[] allAPIResources = selectedApi.getResources();
-                    Set<Resource> acceptableResources
-                            = Utils.getAcceptableResources(allAPIResources, httpMethod, corsRequestMethod);
+                if (selectedApi != null) {
+                    if ((messageContext.getProperty(RESTConstants.SELECTED_RESOURCE) != null)) {
+                        selectedResource = Utils.getSelectedResource(messageContext, httpMethod, corsRequestMethod);
+                    } else {
+                        Resource[] allAPIResources = selectedApi.getResources();
+                        List<Resource> acceptableResourcesList = new LinkedList<>();
+                        List<Resource> optionsResourcesList = new LinkedList<>();
+                        boolean isOptionsRequest = RESTConstants.METHOD_OPTIONS.equals(httpMethod);
+                        for (Resource resource : allAPIResources) {
+                            log.debug("Evaluating resource for acceptable methods");
+                            String[] methods = resource.getMethods();
+                            if (methods == null) {
+                                continue;
+                            }
+
+                            List<String> methodList = Arrays.asList(methods);
+
+                            // Handle OPTIONS request with single OPTIONS method defined 1
+                            if (isOptionsRequest && methods.length == 1 && methodList.contains(httpMethod)) {
+                                optionsResourcesList.add(resource);
+                            } else if ((isOptionsRequest && methodList.contains(corsRequestMethod)) ||
+                                    methodList.contains(httpMethod)) {
+                                acceptableResourcesList.add(resource);
+                            }
+                        }
+                        Set<Resource> acceptableResources = new LinkedHashSet<>();
+                        acceptableResources.addAll(optionsResourcesList);
+                        acceptableResources.addAll(acceptableResourcesList);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Found " + acceptableResources.size() +
+                                    " acceptable resources for method: " + httpMethod);
+                        }
 
                     if (!acceptableResources.isEmpty()) {
                         for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
