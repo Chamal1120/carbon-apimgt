@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [closed]
     branches:
-      - testing-13608op-a7
+      - testing-13608op-a8
 
 jobs:
   port_to_governance:
@@ -26,6 +26,11 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: 'maven'
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
 
       - name: Run opencode
         id: opencode_port
@@ -50,7 +55,11 @@ jobs:
                ii. Subsequent fixes: 'mvn compile --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true'
                iii. Dependency issues: 'mvn install --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -Dmaven.test.skip=true'
             9. Read build results:
-                i. If successful, create 'porting_notes.md' and commit changes locally.
+                i. If successful:
+                    - Create 'porting_notes.md' summarizing what was ported and any manual steps needed. Keep it under 60000 characters. Do not repeat what's in the original PR body.
+                    - Stage all changes: run 'git add -A'.
+                    - Commit with a suitable semantic message.
+                    - Do NOT push. Just commit locally.
                 ii. If failed, print the reasons why the porting is not possible.
 
       - name: Check Port Status
@@ -66,18 +75,20 @@ jobs:
 
       - name: Construct Full PR Body
         if: success()
-        id: prepare_body
+        env:
+          ORIGINAL_BODY: ${{ github.event.pull_request.body }}
         run: |
           echo "## Original PR Description" > final_body.md
-          echo "${{ github.event.pull_request.body }}" >> final_body.md
-          echo -e "\n---\n ## AI Porting Notes" >> final_body.md
+          printf '%s\n' "$ORIGINAL_BODY" >> final_body.md
+          echo -e "\n---\n## AI Porting Notes" >> final_body.md
           [ -f porting_notes.md ] && cat porting_notes.md >> final_body.md || echo "No notes." >> final_body.md
-          
-          {
-            echo "FULL_BODY<<EOF"
-            cat final_body.md
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
+
+          python3 -c "
+          content = open('final_body.md').read()
+          if len(content) > 65000:
+              content = content[:65000] + '\n\n> Body truncated — see workflow logs for full output.'
+          open('final_body.md', 'w').write(content)
+          "
 
       - name: Push and Create PR
         if: success()
@@ -89,5 +100,5 @@ jobs:
             --base "feature-governance" \
             --head "port/pr-${{ github.event.pull_request.number }}" \
             --title "Port: PR #${{ github.event.pull_request.number }} via Kimi k2.5" \
-            --body "${{ steps.prepare_body.outputs.FULL_BODY }}" \
+            --body-file final_body.md \
             --draft
