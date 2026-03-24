@@ -1,0 +1,111 @@
+name: WSO2 Porting Agent (ft. OpenCode)
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - testing-13525op-kimi
+
+jobs:
+  port_to_governance:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+      - name: Run opencode
+        id: opencode_port
+        uses: anomalyco/opencode/github@latest
+        env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          OPENCODE_EXPERIMENTAL_LSP_TOOL: "true"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          model: nvidia/moonshotai/kimi-k2.5
+          use_github_token: true
+          prompt: |
+            1. Checkout branch 'feature-governance'.
+            2. Create a local branch 'port/pr-${{ github.event.pull_request.number }}'.
+            3. Analyze merge commit ${{ github.event.pull_request.merge_commit_sha }}.
+            4. Analyze the current branch with 'read', 'grep', 'glob' and 'list' tools.
+            5. You also have LSP capabilities to understand the codebase efficiently through 'lsp' tool.
+            6. Port changes in the PR surgically to 'feature-governance' using 'edit' tool.
+            7. Use 'write' tool only if you need to create new files for the port.
+            8. Compile and Verify:
+               i. Initial build: 'mvn clean install --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -Dmaven.test.skip=true'
+               ii. Subsequent fixes: 'mvn compile --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true'
+               iii. Dependency issues: 'mvn install --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -Dmaven.test.skip=true'
+            9. Read build results:
+                i. If successful:
+                    - Create 'porting_notes.md' summarizing what was ported and any manual steps needed. Keep it under 60000 characters. Do not repeat what's in the original PR body. All topics should use 5 hashes or more as I have defined 4 hashes as the heading size.
+                    - Stage all changes except 'porting_notes.md':
+                        run 'git add -A' then 'git restore --staged porting_notes.md'.
+                    - Commit with a suitable semantic message.
+                    - Do NOT push. Just commit locally.
+                ii. If failed, print the reasons why the porting is not possible.
+
+      - name: Model Stats
+        id: model_stats
+        run: opencode stats
+
+      - name: Check Port Status
+        id: check_status
+        run: |
+          if [ -f porting_notes.md ]; then
+            echo "PORT_SUCCESS=true" >> $GITHUB_OUTPUT
+          else
+            echo "PORT_SUCCESS=false" >> $GITHUB_OUTPUT
+            echo "Porting failed or build did not pass. Check logs."
+            exit 1
+          fi
+
+      - name: Construct Full PR Body
+        if: success()
+        env:
+          ORIGINAL_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          echo "#### Original PR Description" > final_body.md
+          printf '%s\n' "$ORIGINAL_BODY" >> final_body.md
+          echo -e "\n---\n#### AI Porting Notes" >> final_body.md
+          cat porting_notes.md >> final_body.md
+          echo -e "\n---\n#### Workflow Run" >> final_body.md
+          echo "**Logs:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> final_body.md
+
+          python3 -c "
+          content = open('final_body.md').read()
+          if len(content) > 65000:
+              content = content[:65000] + '\n\n> Body truncated — see workflow logs for full output.'
+          open('final_body.md', 'w').write(content)
+          "
+
+      - name: Push and Create PR
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git push origin port/pr-${{ github.event.pull_request.number }}
+          gh pr create \
+            --base "feature-governance" \
+            --head "port/pr-${{ github.event.pull_request.number }}" \
+            --title "Port: PR #${{ github.event.pull_request.number }} via Kimi k2.5" \
+            --body-file final_body.md \
+            --draft
