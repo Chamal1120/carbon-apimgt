@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [closed]
     branches:
-      - testing-13546op-kimi
+      - testing-13357op-kimi
 
 jobs:
   port_to_governance:
@@ -13,6 +13,7 @@ jobs:
       id-token: write
       contents: write
       pull-requests: write
+      issues: read
 
     steps:
       - name: Checkout
@@ -46,22 +47,25 @@ jobs:
             1. Checkout branch 'feature-governance'.
             2. Create a local branch 'port/pr-${{ github.event.pull_request.number }}'.
             3. Analyze merge commit ${{ github.event.pull_request.merge_commit_sha }}.
-            4. Analyze the current branch with 'read', 'grep', 'glob' and 'list' tools.
-            5. You also have LSP capabilities to understand the codebase efficiently through 'lsp' tool.
-            6. Port changes in the PR surgically to 'feature-governance' using 'edit' tool.
-            7. Use 'write' tool only if you need to create new files for the port.
-            8. Compile and Verify:
-               i. Initial build: 'mvn clean install --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -Dmaven.test.skip=true'
-               ii. Subsequent fixes: 'mvn compile --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true'
-               iii. Dependency issues: 'mvn install --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -Dmaven.test.skip=true'
-            9. Read build results:
+            4. If the PR description references an issue (e.g., "Fixes #123"), use your tools to read that issue and its primary comments to understand the underlying logic and requirements.
+            5. Analyze the current branch with 'read', 'grep', 'glob' and 'list' tools.
+            6. You also have LSP capabilities to understand the codebase efficiently through 'lsp' tool.
+            7. Port changes in the PR surgically to 'feature-governance' using 'edit' tool.
+            8. Use 'write' tool only if you need to create new files for the port.
+            9. Compile and Verify (Note that clean install takes around 12-15 minutes):
+               i. Initial build: 'mvn clean install --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -Dmaven.test.skip=true'.
+               ii. Subsequent issues: 'mvn install --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -Dmaven.test.skip=true'.
+               iii. **DO NOT TRY** module level building.
+            10. Read build results:
                 i. If successful:
                     - Create 'porting_notes.md' summarizing what was ported and any manual steps needed. Keep it under 60000 characters. Do not repeat what's in the original PR body. DO NOT use markdown headings above 4 hashes when defining the content.
                     - Stage all changes except 'porting_notes.md':
-                        run 'git add -A' then 'git restore --staged porting_notes.md'.
+                        * run 'git add -A' then 'git restore --staged porting_notes.md'.
                     - Commit with a suitable semantic message.
                     - Do NOT push. Just commit locally.
-                ii. If failed, print the reasons why the porting is not possible.
+                      ii. If failed:
+                        * Go to step 9 again and try building at least 3 times to get the build successful by looking at build logs.
+                        * If the 4th build attempt is a fail as well, then print the reasons why the porting is not possible and exit.
 
       - name: Model Stats
         id: model_stats
