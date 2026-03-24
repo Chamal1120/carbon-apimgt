@@ -58,8 +58,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -397,23 +397,38 @@ public class APIKeyValidator {
             Resource selectedResource = null;
             String resourceString;
 
-            if (selectedApi != null) {
-                Resource[] selectedAPIResources = selectedApi.getResources();
+                    if (selectedApi != null) {
+                        Resource[] selectedAPIResources = selectedApi.getResources();
 
-                List<Resource> acceptableResourcesList = new LinkedList<>();
+                        List<Resource> acceptableResourcesList = new LinkedList<>();
 
-                for (Resource resource : selectedAPIResources) {
-                    //If the requesting method is OPTIONS or if the Resource contains the requesting method
-                    if (RESTConstants.METHOD_OPTIONS.equals(httpMethod) &&
-                            (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
-                        acceptableResourcesList.add(0, resource);
-                    } else if (RESTConstants.METHOD_OPTIONS.equals(httpMethod) ||
-                            (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
-                        acceptableResourcesList.add(resource);
-                    }
-                }
+                        List<Resource> optionsResourcesList = new LinkedList<>();
 
-                Set<Resource> acceptableResources = new LinkedHashSet<>(acceptableResourcesList);
+                        boolean isOptionsRequest = RESTConstants.METHOD_OPTIONS.equals(httpMethod);
+                        for (Resource resource : selectedAPIResources) {
+                            log.debug("Evaluating resource for acceptable methods");
+                            String[] methods = resource.getMethods();
+                            if (methods == null) {
+                                continue;
+                            }
+
+                            List<String> methodList = Arrays.asList(methods);
+
+                            // Handle OPTIONS request with single OPTIONS method defined 1
+                            if (isOptionsRequest && methods.length == 1 && methodList.contains(httpMethod)) {
+                                optionsResourcesList.add(resource);
+                            } else if (isOptionsRequest || methodList.contains(httpMethod)) {
+                                acceptableResourcesList.add(resource);
+                            }
+                        }
+
+                        Set<Resource> acceptableResources = new LinkedHashSet<>();
+                        acceptableResources.addAll(optionsResourcesList);
+                        acceptableResources.addAll(acceptableResourcesList);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Found " + acceptableResources.size() +
+                                    " acceptable resources for method: " + httpMethod);
+                        }
 
                 if (acceptableResources.size() > 0) {
                     for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
