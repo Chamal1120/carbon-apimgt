@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [closed]
     branches:
-      - testing-13465op-kimi
+      - testing-13546op-kimi
 
 jobs:
   port_to_governance:
