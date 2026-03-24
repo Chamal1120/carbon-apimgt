@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [closed]
     branches:
-      - testing-13608op-a9
+      - testing-13525op-kimi
 
 jobs:
   port_to_governance:
@@ -56,7 +56,7 @@ jobs:
                iii. Dependency issues: 'mvn install --ntp -T 1C -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -Dmaven.test.skip=true'
             9. Read build results:
                 i. If successful:
-                    - Create 'porting_notes.md' summarizing what was ported and any manual steps needed. Keep it under 60000 characters. Do not repeat what's in the original PR body.
+                    - Create 'porting_notes.md' summarizing what was ported and any manual steps needed. Keep it under 60000 characters. Do not repeat what's in the original PR body. All topics should use 5 hashes or more as I have defined 4 hashes as the heading size.
                     - Stage all changes except 'porting_notes.md':
                         run 'git add -A' then 'git restore --staged porting_notes.md'.
                     - Commit with a suitable semantic message.
@@ -83,12 +83,11 @@ jobs:
         env:
           ORIGINAL_BODY: ${{ github.event.pull_request.body }}
         run: |
-          echo "## Original PR Description" > final_body.md
+          echo "#### Original PR Description" > final_body.md
           printf '%s\n' "$ORIGINAL_BODY" >> final_body.md
-          echo -e "\n---\n## AI Porting Notes" >> final_body.md
+          echo -e "\n---\n#### AI Porting Notes" >> final_body.md
           cat porting_notes.md >> final_body.md
-          echo -e "\n---\n## Workflow Run" >> final_body.md
-          echo "**Run ID:** ${{ github.run_id }}" >> final_body.md
+          echo -e "\n---\n#### Workflow Run" >> final_body.md
           echo "**Logs:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> final_body.md
 
           python3 -c "
