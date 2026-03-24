@@ -121,9 +121,9 @@ public class RegistrationServiceImpl implements RegistrationService {
                 return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             }
 
-            if (isUserSuperAdmin(authUserName)) {
-                String tenantDomain = MultitenantUtils.getTenantDomain(authUserName);
-                String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(owner);
+        if (isUserSuperAdmin(authUserName)) {
+            String tenantDomain = MultitenantUtils.getTenantDomain(owner);
+            String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(owner);
                 try {
                     int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                             .getTenantId(tenantDomain);
