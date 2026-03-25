@@ -2142,7 +2142,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void removeFromGateway(API api, Set<APIRevisionDeployment> gatewaysToRemove,
-                                   Set<String> environmentsToAdd) {
+                                   Set<String> environmentsToAdd, boolean onDeleteOrRetire) {
         Set<String> environmentsToAddSet = new HashSet<>(environmentsToAdd);
         Set<String> environmentsToRemove = new HashSet<>();
         for (APIRevisionDeployment apiRevisionDeployment : gatewaysToRemove) {
@@ -2150,7 +2150,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         environmentsToRemove.removeAll(environmentsToAdd);
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        gatewayManager.unDeployFromGateway(api, tenantDomain, environmentsToRemove);
+        gatewayManager.unDeployFromGateway(api, tenantDomain, environmentsToRemove, onDeleteOrRetire);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
                     + " deleted from gateway";
@@ -2591,7 +2591,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 // Remove Custom Backend entries of the API
                 deleteCustomBackendByAPIID(apiUuid);
-                deleteAPIRevisions(apiUuid, organization);
+                deleteAPIRevisions(apiUuid, organization, true);
                 deleteAPIFromDB(api);
                 if (log.isDebugEnabled()) {
                     String logMessage =
@@ -2764,7 +2764,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public void deleteAPIRevisions(String apiUUID, String organization) throws APIManagementException {
+    @Override
+    public void deleteAPIRevisions(String apiUUID, String organization, boolean onDeleteOrRetire)
+            throws APIManagementException {
         List<APIRevision> apiRevisionList = apiMgtDAO.getRevisionsListByAPIUUID(apiUUID);
         WorkflowExecutor apiRevisionDeploymentWFExecutor = getWorkflowExecutor(
                 WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
@@ -2773,7 +2775,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         for (APIRevision apiRevision : apiRevisionList) {
             if (apiRevision.getApiRevisionDeploymentList().size() != 0) {
                 undeployAPIRevisionDeployment(apiUUID, apiRevision.getRevisionUUID(),
-                        apiRevision.getApiRevisionDeploymentList(), organization);
+                        apiRevision.getApiRevisionDeploymentList(), organization, onDeleteOrRetire);
             }
             wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(apiRevision.getRevisionUUID(),
                     WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
@@ -2786,6 +2788,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             deleteAPIRevision(apiUUID, apiRevision.getRevisionUUID(), organization);
         }
+    }
+
+    @Override
+    public void deleteAPIRevisions(String apiUUID, String organization) throws APIManagementException {
+        deleteAPIRevisions(apiUUID, organization, false);
     }
 
     public void deleteAPIProductRevisions(String apiProductUUID, String organization) throws APIManagementException {
@@ -6541,7 +6548,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             gatewayVhosts.put(environment, apiRevisionDeployment.getVhost());
             if (!environmentsToRemove.isEmpty()) {
                 apiMgtDAO.removeAPIRevisionDeployment(apiId, environmentsToRemove);
-                removeFromGateway(api, environmentsToRemove, environmentToPublish);
+                removeFromGateway(api, environmentsToRemove, environmentToPublish, false);
             }
             GatewayArtifactsMgtDAO.getInstance()
                     .addAndRemovePublishedGatewayLabels(apiId, revisionUUID, environmentToPublish, gatewayVhosts,
@@ -6737,7 +6744,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public void undeployAPIRevisionDeployment(String apiId, String apiRevisionId,
-            List<APIRevisionDeployment> apiRevisionDeployments, String organization)
+            List<APIRevisionDeployment> apiRevisionDeployments, String organization, boolean onDeleteOrRetire)
             throws APIManagementException {
 
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
@@ -6767,9 +6774,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (WorkflowException ex) {
             log.warn("Unable to delete Revision Deployment Workflow", ex);
         }
-        removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet());
+        removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet(), onDeleteOrRetire);
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiId, apiRevisionId, environmentsToRemove);
+    }
+
+    @Override
+    public void undeployAPIRevisionDeployment(String apiId, String apiRevisionId,
+            List<APIRevisionDeployment> apiRevisionDeployments, String organization)
+            throws APIManagementException {
+        undeployAPIRevisionDeployment(apiId, apiRevisionId, apiRevisionDeployments, organization, false);
     }
 
     /**

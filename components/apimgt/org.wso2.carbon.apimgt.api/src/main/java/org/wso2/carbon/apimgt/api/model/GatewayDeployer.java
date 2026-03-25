@@ -58,6 +58,17 @@ public interface GatewayDeployer {
     boolean undeploy(String externalReference) throws APIManagementException;
 
     /**
+     * Undeploy API artifact from provided environment.
+     *
+     * @param externalReference reference artifact
+     * @param delete true if undeploy is triggered from API delete or retire
+     * @throws APIManagementException if error occurs when un-deploying APIs from external gateway
+     */
+    default boolean undeploy(String externalReference, boolean delete) throws APIManagementException {
+        return undeploy(externalReference);
+    }
+
+    /**
      * This method returns the validation result of a given API with the external gateway
      *
      * @return List<String> validation result
