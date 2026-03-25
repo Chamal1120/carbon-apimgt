@@ -48,6 +48,7 @@ public class API implements CacheableEntity<String> {
     private boolean isSubscriptionValidationDisabled = false;
     private Boolean isEgress = null;
     private String subtype = null;
+    private String lastUpdatedEventId = null;
 
     public API() {
     }
@@ -363,5 +364,13 @@ public class API implements CacheableEntity<String> {
 
     public void setSubtype(String subtype) {
         this.subtype = subtype;
+    }
+
+    public String getLastUpdatedEventId() {
+        return lastUpdatedEventId;
+    }
+
+    public void setLastUpdatedEventId(String lastUpdatedEventId) {
+        this.lastUpdatedEventId = lastUpdatedEventId;
     }
 }
